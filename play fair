@@ -1,0 +1,100 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+char keyTable[5][5];
+
+void generateKeyTable(char key[]) {
+    int map[26] = {0};
+    int k = 0;
+
+    for (int i = 0; key[i]; i++) {
+        char ch = toupper(key[i]);
+        if (ch == 'J') ch = 'I';
+        if (isalpha(ch) && !map[ch - 'A']) {
+            map[ch - 'A'] = 1;
+            keyTable[k / 5][k % 5] = ch;
+            k++;
+        }
+    }
+
+    for (char ch = 'A'; ch <= 'Z'; ch++) {
+        if (ch == 'J') continue;
+        if (!map[ch - 'A']) {
+            keyTable[k / 5][k % 5] = ch;
+            k++;
+        }
+    }
+}
+
+void findPosition(char ch, int *row, int *col) {
+    if (ch == 'J') ch = 'I';
+    for (int i = 0; i < 5; i++)
+        for (int j = 0; j < 5; j++)
+            if (keyTable[i][j] == ch) {
+                *row = i;
+                *col = j;
+                return;
+            }
+}
+
+void encryptPlayfair(char plaintext[]) {
+    int len = strlen(plaintext);
+    char cipherText[100];
+    int idx = 0;
+
+    for (int i = 0; i < len; i++) {
+        if (!isalpha(plaintext[i])) continue;
+        char a = toupper(plaintext[i]);
+        char b;
+        int j = i + 1;
+        while (j < len && !isalpha(plaintext[j])) j++;
+        b = (j < len) ? toupper(plaintext[j]) : 'X';
+
+        if (a == b) b = 'X';
+
+        int row1, col1, row2, col2;
+        findPosition(a, &row1, &col1);
+        findPosition(b, &row2, &col2);
+
+        if (row1 == row2) {
+            cipherText[idx++] = keyTable[row1][(col1 + 1) % 5];
+            cipherText[idx++] = keyTable[row2][(col2 + 1) % 5];
+        } else if (col1 == col2) {
+            cipherText[idx++] = keyTable[(row1 + 1) % 5][col1];
+            cipherText[idx++] = keyTable[(row2 + 1) % 5][col2];
+        } else {
+            cipherText[idx++] = keyTable[row1][col2];
+            cipherText[idx++] = keyTable[row2][col1];
+        }
+
+        i = j;
+    }
+
+    cipherText[idx] = '\0';
+    printf("Encrypted text: %s\n", cipherText);
+}
+
+int main() {
+    char key[100], plaintext[100];
+
+    printf("Enter keyword: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = '\0';
+
+    generateKeyTable(key);
+
+    printf("\n5x5 Key Matrix:\n");
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++)
+            printf("%c ", keyTable[i][j]);
+        printf("\n");
+    }
+
+    printf("\nEnter plaintext: ");
+    fgets(plaintext, sizeof(plaintext), stdin);
+    plaintext[strcspn(plaintext, "\n")] = '\0';
+
+    encryptPlayfair(plaintext);
+    return 0;
+}
