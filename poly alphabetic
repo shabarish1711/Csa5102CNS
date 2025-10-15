@@ -1,0 +1,38 @@
+#include <stdio.h>
+#include <string.h>
+#include <ctype.h>
+
+void vigenereEncrypt(char text[], char key[]) {
+    int textLen = strlen(text);
+    int keyLen = strlen(key);
+    char cipherText[100];
+
+    for (int i = 0, j = 0; i < textLen; i++) {
+        char ch = text[i];
+        if (isalpha(ch)) {
+            char base = isupper(ch) ? 'A' : 'a';
+            char keyChar = toupper(key[j % keyLen]) - 'A';
+            cipherText[i] = (ch - base + keyChar) % 26 + base;
+            j++;
+        } else {
+            cipherText[i] = ch;
+        }
+    }
+    cipherText[textLen] = '\0';
+    printf("Encrypted text: %s\n", cipherText);
+}
+
+int main() {
+    char text[100], key[100];
+
+    printf("Enter plaintext: ");
+    fgets(text, sizeof(text), stdin);
+    text[strcspn(text, "\n")] = '\0';
+
+    printf("Enter key: ");
+    fgets(key, sizeof(key), stdin);
+    key[strcspn(key, "\n")] = '\0';
+
+    vigenereEncrypt(text, key);
+    return 0;
+}
