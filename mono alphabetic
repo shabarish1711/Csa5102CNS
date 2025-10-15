@@ -1,0 +1,30 @@
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
+
+int main() {
+    char plainText[100], cipherText[100];
+    char key[] = "QWERTYUIOPASDFGHJKLZXCVBNM"; // substitution key
+
+    printf("Enter plaintext: ");
+    fgets(plainText, sizeof(plainText), stdin);
+
+    // Remove newline character from fgets
+    plainText[strcspn(plainText, "\n")] = '\0';
+
+    for (int i = 0; plainText[i] != '\0'; i++) {
+        char ch = plainText[i];
+        if (isalpha(ch)) {
+            if (isupper(ch))
+                cipherText[i] = key[ch - 'A'];
+            else
+                cipherText[i] = tolower(key[ch - 'a']);
+        } else {
+            cipherText[i] = ch;
+        }
+    }
+
+    cipherText[strlen(plainText)] = '\0';
+
+    printf("Encrypted text: %s\n", cipherText);
+    return 0;
